@@ -1,10 +1,10 @@
-CC := gcc
+CC := g++
 obj := shell.o
 out := a.out
 
 all:${obj}
 	${CC} ${obj}
-%.o:%.c
+%.o:%.cpp
 	${CC} -c $^ -o $@
 
 .PHONY:clean
