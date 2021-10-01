@@ -44,7 +44,7 @@ void InputRedirect(char* args[], FILE* input_file) {
     }
     default: { /* parent process */
       waitpid(pid, NULL, 0);
-      _exit(0);
+      exit(0);
       break;
     }
   }
@@ -65,7 +65,7 @@ void OutputRedirect(char* args[], FILE* output_file) {
     }
     default: { /* parent process */
       waitpid(pid, NULL, 0);
-      _exit(0);
+      exit(0);
       break;
     }
   }
