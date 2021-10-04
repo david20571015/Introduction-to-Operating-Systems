@@ -88,10 +88,8 @@ Matrix Matrix::Multiply(const Matrix &mat, const int num_processes) const {
     }
   }
 
-  int remain_processes = num_processes;
-  while (remain_processes) {
-    pid_t pid = wait(NULL);
-    remain_processes -= (pid > 0 ? 1 : 0);
+  for (int i = 0; i < num_processes; ++i) {
+    wait(NULL);
   }
 
   Matrix c(this->order_, result);
