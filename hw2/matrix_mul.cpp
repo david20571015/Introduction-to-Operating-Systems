@@ -105,12 +105,12 @@ inline void Matrix::RowMultiply(const Matrix &mat, uint32_t *const target, const
 }
 
 void MeasureTimeCost(const Matrix &mat, int num_processes) {
-  printf("Multiplying matrices using %d processes\n", num_processes);
+  printf("Multiplying matrices using %d %s\n", num_processes, num_processes == 1 ? "process" : "processes");
   struct timeval start, end;
   gettimeofday(&start, 0);
   Matrix result = mat.Multiply(mat, num_processes);
   gettimeofday(&end, 0);
   time_t sec = end.tv_sec - start.tv_sec;
   time_t usec = end.tv_usec - start.tv_usec;
-  printf("Elapsed %f ms, Checksum %u\n", sec * 1000 + (usec / 1000.0), result.ComputeChecksum());
+  printf("Elapsed time: %f sec, Checksum: %u\n", sec + (usec / 1e6), result.ComputeChecksum());
 }
