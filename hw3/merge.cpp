@@ -29,7 +29,9 @@ struct Job {
 std::queue<Job> job_list;
 sem_t arrival_job_event, completion_job_event;
 sem_t job_list_mutex, job_table_mutex;
-unsigned job_table[16] = {0};  // 0: not dispatched yet, 1: dispatched, 2: completed.
+
+// 0: not dispatched yet, 1: dispatched, 2: completed.
+unsigned job_table[16] = {0};
 
 std::vector<int> ReadData(const std::string filename);
 void WriteData(const std::string filename, const std::vector<int>& v);
@@ -52,7 +54,8 @@ int main() {
     gettimeofday(&end, 0);
     time_t sec = end.tv_sec - start.tv_sec;
     time_t usec = end.tv_usec - start.tv_usec;
-    std::cout << "worker thread #" << n_threads << ", elapsed " << sec * 1e3 + usec * 1e-3 << " ms"<< std::endl;
+    std::cout << "worker thread #" << n_threads << ", elapsed "
+              << sec * 1e3 + usec * 1e-3 << " ms" << std::endl;
     WriteData("output_" + std::to_string(n_threads) + ".txt", vec);
   }
 
@@ -79,6 +82,9 @@ void ParallelSort(std::vector<int>& v, int n_threads) {
   for (size_t i = 0; i < n_threads; ++i) {
     pthread_cancel(worker[i]);
   }
+  for (size_t i = 0; i < n_threads; ++i) {
+    pthread_join(worker[i], NULL);
+  }
   delete[] worker;
 
   sem_destroy(&arrival_job_event);
@@ -95,7 +101,8 @@ void* dispatch(void* args) {
 
   for (size_t i = 8; i <= 15; ++i) {
     sem_wait(&job_list_mutex);
-    job_list.push(Job{BubbleSort, v, (i - 8) * v->size() / 8, (i - 7) * v->size() / 8, i});
+    job_list.push(Job{BubbleSort, v, (i - 8) * v->size() / 8,
+                      (i - 7) * v->size() / 8, i});
     sem_post(&job_list_mutex);
     sem_post(&arrival_job_event);
   }
@@ -105,7 +112,8 @@ void* dispatch(void* args) {
 
     sem_wait(&job_table_mutex);
     for (size_t i = 1; i <= 7; ++i) {
-      if (job_table[i] == 0 && job_table[i * 2] == 2 && job_table[i * 2 + 1] == 2) {
+      if (job_table[i] == 0 && job_table[i * 2] == 2 &&
+          job_table[i * 2 + 1] == 2) {
         sem_wait(&job_list_mutex);
         switch (i) {
           case 1:
@@ -113,13 +121,15 @@ void* dispatch(void* args) {
             break;
           case 2:
           case 3:
-            job_list.push(Job{Merge, v, (i - 2) * v->size() / 2, (i - 1) * v->size() / 2, i});
+            job_list.push(Job{Merge, v, (i - 2) * v->size() / 2,
+                              (i - 1) * v->size() / 2, i});
             break;
           case 4:
           case 5:
           case 6:
           case 7:
-            job_list.push(Job{Merge, v, (i - 4) * v->size() / 4, (i - 3) * v->size() / 4, i});
+            job_list.push(Job{Merge, v, (i - 4) * v->size() / 4,
+                              (i - 3) * v->size() / 4, i});
             break;
         }
         sem_post(&job_list_mutex);
