@@ -3,11 +3,17 @@ OBJ := merge.o
 TARGET := a.out
 CCFLAGS := -pthread
 
-all:${OBJ}
+all: ${TARGET}
+
+${TARGET}: ${OBJ}
 	${CC} ${CCFLAGS} ${OBJ} -o ${TARGET}
-%.o:%.cpp
+
+%.o: %.cpp
 	${CC} ${CCFLAGS} -c $^ -o $@
 
-.PHONY:clean
+.PHONY:clean test
 clean:
-	rm ${OBJ} ${TARGET} 
+	rm ${OBJ} ${TARGET}
+
+test: ${TARGET}
+	./${TARGET}
