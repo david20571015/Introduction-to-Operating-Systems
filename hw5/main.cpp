@@ -192,9 +192,6 @@ class LruCache {
 };
 
 int main(int argc, char const *argv[]) {
-  std::ios_base::sync_with_stdio(false);
-  std::cin.tie(nullptr);
-
   timeval start, end;
   double elapsed_seconds;
 
