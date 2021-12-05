@@ -13,9 +13,40 @@ public GitHub repository or a public web page.
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <list>
-#include <map>
+
+#if defined(__GNUG__)
+#include <ext/hash_map>
+template <class K, class V>
+using unordered_map = __gnu_cxx::hash_map<K, V>;
+#elif defined(_MSC_VER)
+#include <hash_map>
+template <class K, class V>
+using unordered_map = __gnu_cxx::hash_map<K, V>;
+#else
 #include <unordered_map>
+template <class K, class V>
+using unordered_map = std::unordered_map<K, V>;
+#endif
+
+template <class Value>
+struct Node {
+  Value value;
+  Node *prev, *next;
+
+  Node(Value value) : value(value), prev(nullptr), next(nullptr) {}
+
+  void Insert(Node *node) {
+    this->prev = node->prev;
+    this->next = node;
+    this->prev->next = this;
+    this->next->prev = this;
+  }
+
+  void Remove() {
+    this->prev->next = this->next;
+    this->next->prev = this->prev;
+  }
+};
 
 class TraceLoader {
  public:
@@ -34,7 +65,10 @@ class TraceLoader {
 
 class LfuCache {
  public:
-  LfuCache(int frame_size) : frame_size_(frame_size){};
+  LfuCache(int frame_size) : frame_size_(frame_size) {
+    head_.next = &tail_;
+    tail_.prev = &head_;
+  };
   ~LfuCache() = default;
 
   void Test(TraceLoader &loader) {
@@ -49,19 +83,40 @@ class LfuCache {
     bool is_hit = (lookup_.find(page) != lookup_.end());
 
     if (is_hit) {
-      int ref_count = lookup_[page]->first;
-      auto hint = frame_.erase(lookup_[page]);
-      lookup_[page] = frame_.emplace_hint(hint, ref_count + 1, page);
+      auto target_page = lookup_[page];
+      target_page->value.first++;
+
+      // Move target_page to the head of the sub-list whose ref count is
+      // target_page's ref count + 1.
+      auto new_place = target_page;
+      while (new_place->prev->value.first <= target_page->value.first &&
+             new_place->prev != &head_) {
+        new_place = new_place->prev;
+      }
+
+      if (new_place != target_page) {
+        target_page->Remove();
+        target_page->Insert(new_place);
+      }
+
     } else {
       // Remove LFU page from list if cache is full.
-      if (frame_.size() == static_cast<size_t>(frame_size_)) {
-        int victim_page = frame_.cbegin()->second;
-
-        frame_.erase(lookup_[victim_page]);
-        lookup_.erase(victim_page);
+      if (lookup_.size() == static_cast<size_t>(frame_size_)) {
+        auto victim_page = tail_.prev;
+        victim_page->Remove();
+        lookup_.erase(victim_page->value.second);
+        delete victim_page;
       }
       // Add new page to list.
-      lookup_[page] = frame_.emplace_hint(frame_.cend(), 1, page);
+      auto new_page = new Node<PageInfo>(std::make_pair(1, page));
+
+      Node<PageInfo> *new_place = &tail_;
+      while (new_place->prev->value.first <= 1 && new_place->prev != &head_) {
+        new_place = new_place->prev;
+      }
+      new_page->Insert(new_place);
+
+      lookup_[page] = new_page;
     }
 
     is_hit ? ++hit_count_ : ++miss_count_;
@@ -75,14 +130,20 @@ class LfuCache {
   }
 
  private:
+  using PageInfo = std::pair<int, int>;  // (ref count, page)
+
   int frame_size_, hit_count_ = 0, miss_count_ = 0;
-  std::multimap<int, int> frame_;  // (ref count, page)
-  std::unordered_map<int, decltype(frame_.begin())> lookup_;
+  Node<PageInfo> head_ = Node<PageInfo>(std::make_pair(-1, -1)),
+                 tail_ = Node<PageInfo>(std::make_pair(-1, -1));
+  unordered_map<int, Node<PageInfo> *> lookup_;
 };
 
 class LruCache {
  public:
-  LruCache(int frame_size) : frame_size_(frame_size){};
+  LruCache(int frame_size) : frame_size_(frame_size) {
+    head_.next = &tail_;
+    tail_.prev = &head_;
+  };
   ~LruCache() = default;
 
   void Test(TraceLoader &loader) {
@@ -97,16 +158,22 @@ class LruCache {
     bool is_hit = (lookup_.find(page) != lookup_.end());
 
     if (is_hit) {
-      // Remove page from list.
-      frame_.erase(lookup_.at(page));
-    } else if (frame_.size() == static_cast<size_t>(frame_size_)) {
+      auto target_page = lookup_[page];
+      target_page->Remove();
+      target_page->Insert(&tail_);
+    } else {
       // Remove LRU page from list if cache is full.
-      lookup_.erase(frame_.back());
-      frame_.pop_back();
-    }
+      if (lookup_.size() == static_cast<size_t>(frame_size_)) {
+        auto victim_page = head_.next;
+        victim_page->Remove();
+        lookup_.erase(victim_page->value);
+        delete victim_page;
+      }
+      auto new_page = new Node<int>(page);
+      new_page->Insert(&tail_);
 
-    frame_.push_front(page);
-    lookup_[page] = frame_.begin();
+      lookup_[page] = new_page;
+    }
 
     is_hit ? ++hit_count_ : ++miss_count_;
     return is_hit;
@@ -120,8 +187,8 @@ class LruCache {
 
  private:
   int frame_size_, hit_count_ = 0, miss_count_ = 0;
-  std::list<int> frame_;
-  std::unordered_map<int, decltype(frame_.begin())> lookup_;
+  Node<int> head_ = Node<int>(-1), tail_ = Node<int>(-1);
+  unordered_map<int, Node<int> *> lookup_;
 };
 
 int main(int argc, char const *argv[]) {
