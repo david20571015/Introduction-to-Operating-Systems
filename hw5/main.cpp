@@ -68,8 +68,15 @@ class LfuCache {
   LfuCache(int frame_size) : frame_size_(frame_size) {
     head_.next = &tail_;
     tail_.prev = &head_;
-  };
-  ~LfuCache() = default;
+  }
+
+  ~LfuCache() {
+    while (head_.next != &tail_) {
+      auto ptr = head_.next;
+      ptr->Remove();
+      delete ptr;
+    }
+  }
 
   void Test(TraceLoader &loader) {
     int page;
@@ -143,8 +150,15 @@ class LruCache {
   LruCache(int frame_size) : frame_size_(frame_size) {
     head_.next = &tail_;
     tail_.prev = &head_;
-  };
-  ~LruCache() = default;
+  }
+
+  ~LruCache() {
+    while (head_.next != &tail_) {
+      auto ptr = head_.next;
+      ptr->Remove();
+      delete ptr;
+    }
+  }
 
   void Test(TraceLoader &loader) {
     int page;
