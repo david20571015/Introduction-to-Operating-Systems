@@ -1,0 +1,5 @@
+/home/david20571015/Documents/tarfs
+/home/david20571015/Documents/tarfs/dir1/dir2
+/home/david20571015/Documents/tarfs
+./testcase/1.txt: line 7: cd: largefiles: No such file or directory
+/home/david20571015/Documents/tarfs/dir

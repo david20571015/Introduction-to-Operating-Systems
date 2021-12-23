@@ -1,0 +1,27 @@
+tarfs:
+total 0
+drwxr-xr-x 0 root   root      0 Nov 29  2019 dir
+drwxrwxr-x 0 david20571015 david20571015    0 Nov 29  2019 dir1
+-rw-rw-r-- 0 david20571015 david20571015  168 Nov 20  2019 hello_world.html
+drwxrwxr-x 0 david20571015 david20571015    0 Nov 25  2019 largefile
+-rw-rw-r-- 0 david20571015 david20571015 1613 Nov 20  2015 tar.html
+
+tarfs/dir:
+total 0
+-rw-r--r-- 0 root root 0 Nov 29  2019 empty_file
+
+tarfs/dir1:
+total 0
+-rw-rw-r-- 0 david20571015 david20571015 9 Nov 20  2019 1.txt
+-rw-rw-r-- 0 david20571015 david20571015 7 Nov 29  2019 2.txt
+-rw-rw-r-- 0 david20571015 david20571015 8 Nov 29  2019 3.txt
+drwxrwxr-x 0 david20571015 david20571015 0 Nov 29  2019 dir2
+
+tarfs/dir1/dir2:
+total 0
+-rw-rw-r-- 0 david20571015 david20571015 168 Nov 20  2019 hello_world.html
+
+tarfs/largefile:
+total 0
+-rw-rw-r-- 0 david20571015 david20571015 8192 Nov 25  2019 8mb.txt
+-rw-rw-r-- 0 david20571015 david20571015 9216 Nov 25  2019 9mb.txt

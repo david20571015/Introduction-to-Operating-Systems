@@ -1,0 +1,9 @@
+cd tarfs
+pwd
+cd dir1/dir2
+pwd
+cd ../..
+pwd
+cd largefiles
+cd largefile/../dir
+pwd

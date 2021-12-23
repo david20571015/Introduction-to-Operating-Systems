@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Test</title>
+    </head>
+    <body>
+        This is a <b>test</b> program for ras.
+    </body>
+</html>
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Test</title>
+    </head>
+    <body>
+        This is a <b>test</b> program for ras.
+    </body>
+</html>
+
+cat: tarfs/dir1/dir2/2.txt: No such file or directory
+1,2c1
+< 
+< hellow!
+---
+> hello!
+1a2
+> 

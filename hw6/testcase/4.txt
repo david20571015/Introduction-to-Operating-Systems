@@ -1,0 +1,5 @@
+#! /bin/bash
+
+od -j4096 -N10 tarfs/largefile/8mb.txt
+od -j5000 -N10 tarfs/largefile/9mb.txt
+od -j9000 -N10 tarfs/largefile/9mb.txt

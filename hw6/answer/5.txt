@@ -1,0 +1,4 @@
+total 0
+-rw-rw-r-- 0 david20571015 david20571015 23 Nov 26  2019 blue.txt
+-rw-rw-r-- 0 david20571015 david20571015 22 Nov 26  2019 red.txt
+-rw-rw-r-- 0 david20571015 david20571015 12 Nov 26  2019 yellow.txt

@@ -1,0 +1,4 @@
+#! /bin/bash
+cat tarfs/blue.txt
+cat tarfs/red.txt
+cat tarfs/yellow.txt
